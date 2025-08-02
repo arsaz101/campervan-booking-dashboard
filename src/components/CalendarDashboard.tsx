@@ -11,7 +11,7 @@ import {
 } from "date-fns";
 import Autocomplete from "./Autocomplete";
 import BookingDisplay from "./BookingDisplay";
-import { searchStations, getBookingDetails } from "../services/api";
+import { searchStations, getBookingDetails, getBookingsByStation } from "../services/api";
 import { Station, Booking } from "../types";
 
 interface BookingWithDuration extends Booking {
@@ -30,181 +30,29 @@ const CalendarDashboard: React.FC = () => {
     type: "success" | "error";
   } | null>(null);
 
-  // Mock bookings data with consistent time information
-  const mockBookings: BookingWithDuration[] = [
-    {
-      id: "1",
-      stationId: "1",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        15,
-        9,
-        0
-      ), // 9 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        20,
-        17,
-        0
-      ), // 5 PM
-      customerName: "John Smith",
-      vehicleType: "Campervan",
-      duration: 5,
-    },
-    {
-      id: "2",
-      stationId: "2",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        16,
-        10,
-        0
-      ), // 10 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        18,
-        16,
-        0
-      ), // 4 PM
-      customerName: "Sarah Johnson",
-      vehicleType: "RV",
-      duration: 2,
-    },
-    {
-      id: "3",
-      stationId: "1",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        17,
-        8,
-        0
-      ), // 8 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        22,
-        18,
-        0
-      ), // 6 PM
-      customerName: "Mike Wilson",
-      vehicleType: "Campervan",
-      duration: 5,
-    },
-    {
-      id: "4",
-      stationId: "3",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        18,
-        11,
-        0
-      ), // 11 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        21,
-        15,
-        0
-      ), // 3 PM
-      customerName: "Emily Davis",
-      vehicleType: "RV",
-      duration: 3,
-    },
-    {
-      id: "5",
-      stationId: "2",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        19,
-        7,
-        0
-      ), // 7 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        25,
-        19,
-        0
-      ), // 7 PM
-      customerName: "David Brown",
-      vehicleType: "Campervan",
-      duration: 6,
-    },
-    {
-      id: "6",
-      stationId: "4",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        21,
-        9,
-        30
-      ), // 9:30 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        27,
-        17,
-        30
-      ), // 5:30 PM
-      customerName: "Lisa Anderson",
-      vehicleType: "Campervan",
-      duration: 6,
-    },
-    {
-      id: "7",
-      stationId: "5",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        23,
-        14,
-        0
-      ), // 2 PM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        25,
-        12,
-        0
-      ), // 12 PM
-      customerName: "Robert Chen",
-      vehicleType: "RV",
-      duration: 2,
-    },
-    {
-      id: "8",
-      stationId: "6",
-      startDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        26,
-        6,
-        0
-      ), // 6 AM
-      endDate: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        30,
-        20,
-        0
-      ), // 8 PM
-      customerName: "Maria Garcia",
-      vehicleType: "Campervan",
-      duration: 4,
-    },
-  ];
-
   useEffect(() => {
-    setBookings(mockBookings);
-  }, []);
+    if (selectedStation) {
+      setLoading(true);
+      getBookingsByStation(selectedStation.id)
+        .then((bookings) => {
+          setBookings(bookings);
+          if (bookings.length > 0) {
+            const firstBooking = bookings.reduce((earliest, current) => {
+              return new Date(current.startDate) < new Date(earliest.startDate)
+                ? current
+                : earliest;
+            });
+            setCurrentWeek(new Date(firstBooking.startDate));
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching bookings:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [selectedStation]);
 
   const weekDays = Array.from({ length: 7 }, (_, i) =>
     addDays(startOfWeek(currentWeek), i)
@@ -215,7 +63,6 @@ const CalendarDashboard: React.FC = () => {
 
     return bookings.filter(
       (booking) =>
-        booking.stationId === selectedStation.id &&
         (isSameDay(booking.startDate, date) ||
           isSameDay(booking.endDate, date) ||
           isWithinInterval(date, {
@@ -378,7 +225,7 @@ const CalendarDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           {/* Day Headers */}
-          <div className="grid grid-cols-8 border-b border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-8 border-b border-gray-200">
             <div className="p-3 text-center text-sm font-medium text-gray-500 bg-gray-50">
               Time
             </div>
