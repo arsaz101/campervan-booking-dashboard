@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import Autocomplete from "./Autocomplete";
 import BookingDisplay from "./BookingDisplay";
+import RescheduleModal from "./RescheduleModal"; // Import the modal
 import { searchStations, getBookingDetails, getBookingsByStation } from "../services/api";
 import { Station, Booking } from "../types";
 
@@ -24,6 +25,7 @@ const CalendarDashboard: React.FC = () => {
   const [bookings, setBookings] = useState<BookingWithDuration[]>([]);
   const [selectedBooking, setSelectedBooking] =
     useState<BookingWithDuration | null>(null);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false); // State for modal
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     message: string;
@@ -132,6 +134,7 @@ const CalendarDashboard: React.FC = () => {
     }
 
     // Close the modal
+    setIsRescheduleModalOpen(false);
     setSelectedBooking(null);
 
     // Show success notification
@@ -145,6 +148,10 @@ const CalendarDashboard: React.FC = () => {
 
     // Clear notification after 3 seconds
     setTimeout(() => setNotification(null), 3000);
+  };
+
+  const openRescheduleModal = () => {
+    setIsRescheduleModalOpen(true);
   };
 
   const nextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
@@ -406,11 +413,20 @@ const CalendarDashboard: React.FC = () => {
       )}
 
       {/* Booking Detail Modal */}
-      {selectedBooking && (
+      {selectedBooking && !isRescheduleModalOpen && (
         <BookingDisplay
           booking={selectedBooking}
           stationName={selectedStation?.name}
           onClose={() => setSelectedBooking(null)}
+          onReschedule={openRescheduleModal} // Open reschedule modal
+        />
+      )}
+
+      {/* Reschedule Modal */}
+      {isRescheduleModalOpen && selectedBooking && (
+        <RescheduleModal
+          booking={selectedBooking}
+          onClose={() => setIsRescheduleModalOpen(false)} // Close reschedule modal
           onReschedule={handleReschedule}
         />
       )}

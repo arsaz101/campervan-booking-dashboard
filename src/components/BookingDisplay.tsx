@@ -11,11 +11,7 @@ interface BookingDisplayProps {
   booking: BookingWithDuration;
   stationName?: string;
   onClose: () => void;
-  onReschedule?: (
-    bookingId: string,
-    newStartDate: Date,
-    newEndDate: Date
-  ) => void;
+  onReschedule?: () => void;
 }
 
 const BookingDisplay: React.FC<BookingDisplayProps> = ({
@@ -24,31 +20,6 @@ const BookingDisplay: React.FC<BookingDisplayProps> = ({
   onClose,
   onReschedule,
 }) => {
-  const handleReschedule = async () => {
-    try {
-      // Reschedule to a different time slot within the same week
-      const newStartDate = new Date(booking.startDate);
-      newStartDate.setHours(newStartDate.getHours() + 2); // Move 2 hours later
-
-      const newEndDate = new Date(booking.endDate);
-      newEndDate.setHours(newEndDate.getHours() + 2); // Move 2 hours later
-
-      // Call the actual reschedule API
-      const updatedBooking = await rescheduleBooking(
-        booking.id,
-        newStartDate,
-        newEndDate
-      );
-
-      if (updatedBooking && onReschedule) {
-        onReschedule(booking.id, newStartDate, newEndDate);
-      }
-    } catch (error) {
-      console.error("Error rescheduling booking:", error);
-      alert("Failed to reschedule booking. Please try again.");
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -136,7 +107,7 @@ const BookingDisplay: React.FC<BookingDisplayProps> = ({
               </button>
               {onReschedule && (
                 <button
-                  onClick={handleReschedule}
+                  onClick={onReschedule}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Reschedule
