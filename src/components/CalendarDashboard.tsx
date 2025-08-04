@@ -148,6 +148,9 @@ const CalendarDashboard: React.FC = () => {
 
     // Clear notification after 3 seconds
     setTimeout(() => setNotification(null), 3000);
+
+    // Scroll to the new booking's week
+    setCurrentWeek(newStartDate);
   };
 
   const openRescheduleModal = () => {

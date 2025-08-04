@@ -95,9 +95,6 @@ src/
 ├── services/
 │   ├── __tests__/           # Service tests
 │   └── api.ts              # Mock API functions
-├── state/
-│   ├── __tests__/           # State tests
-│   └── bookingsStore.ts    # Zustand store
 ├── types/
 │   └── index.ts            # TypeScript type definitions
 └── setupTests.ts           # Jest setup configuration
