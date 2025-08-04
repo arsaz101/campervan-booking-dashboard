@@ -1,7 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
 import { Booking } from "../types";
-import { rescheduleBooking } from "../services/api";
 
 interface BookingWithDuration extends Booking {
   duration: number;

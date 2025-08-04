@@ -14,23 +14,33 @@ import BookingDisplay from "./BookingDisplay";
 import RescheduleModal from "./RescheduleModal"; // Import the modal
 import { searchStations, getBookingDetails, getBookingsByStation } from "../services/api";
 import { Station, Booking } from "../types";
+import useBookingsStore from "../state/bookingsStore";
+import useMediaQuery from "../hooks/useMediaQuery";
 
 interface BookingWithDuration extends Booking {
   duration: number;
 }
 
 const CalendarDashboard: React.FC = () => {
-  const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
-  const [bookings, setBookings] = useState<BookingWithDuration[]>([]);
-  const [selectedBooking, setSelectedBooking] =
-    useState<BookingWithDuration | null>(null);
+  const {
+    bookings,
+    selectedStation,
+    selectedBooking,
+    currentWeek,
+    loading,
+    setBookings,
+    setSelectedStation,
+    setSelectedBooking,
+    setCurrentWeek,
+    setLoading,
+    updateBooking,
+  } = useBookingsStore();
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false); // State for modal
-  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     if (selectedStation) {
@@ -54,10 +64,10 @@ const CalendarDashboard: React.FC = () => {
           setLoading(false);
         });
     }
-  }, [selectedStation]);
+  }, [selectedStation, setBookings, setCurrentWeek, setLoading]);
 
-  const weekDays = Array.from({ length: 7 }, (_, i) =>
-    addDays(startOfWeek(currentWeek), i)
+  const weekDays = Array.from({ length: isMobile ? 3 : 7 }, (_, i) =>
+    isMobile ? addDays(currentWeek, i) : addDays(startOfWeek(currentWeek), i)
   );
 
   const getBookingsForDay = (date: Date) => {
@@ -97,41 +107,13 @@ const CalendarDashboard: React.FC = () => {
     newStartDate: Date,
     newEndDate: Date
   ) => {
-    // Update local state with the rescheduled booking
-    setBookings((prev) =>
-      prev.map((booking) =>
-        booking.id === bookingId
-          ? {
-              ...booking,
-              startDate: newStartDate,
-              endDate: newEndDate,
-              duration:
-                Math.ceil(
-                  (newEndDate.getTime() - newStartDate.getTime()) /
-                    (1000 * 60 * 60 * 24)
-                ) + 1,
-            }
-          : booking
-      )
-    );
+    const duration =
+      Math.ceil(
+        (newEndDate.getTime() - newStartDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1;
 
-    // Update the selected booking if it's the one being rescheduled
-    if (selectedBooking && selectedBooking.id === bookingId) {
-      setSelectedBooking((prev) =>
-        prev
-          ? {
-              ...prev,
-              startDate: newStartDate,
-              endDate: newEndDate,
-              duration:
-                Math.ceil(
-                  (newEndDate.getTime() - newStartDate.getTime()) /
-                    (1000 * 60 * 60 * 24)
-                ) + 1,
-            }
-          : null
-      );
-    }
+    updateBooking(bookingId, { startDate: newStartDate, endDate: newEndDate, duration });
 
     // Close the modal
     setIsRescheduleModalOpen(false);
@@ -157,8 +139,21 @@ const CalendarDashboard: React.FC = () => {
     setIsRescheduleModalOpen(true);
   };
 
-  const nextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
-  const prevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
+  const nextDate = () => {
+    if (isMobile) {
+      setCurrentWeek(addDays(currentWeek, 3));
+    } else {
+      setCurrentWeek(addWeeks(currentWeek, 1));
+    }
+  };
+
+  const prevDate = () => {
+    if (isMobile) {
+      setCurrentWeek(addDays(currentWeek, -3));
+    } else {
+      setCurrentWeek(subWeeks(currentWeek, 1));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -185,7 +180,7 @@ const CalendarDashboard: React.FC = () => {
             {/* Week Navigation */}
             <div className="flex items-center justify-center space-x-4">
               <button
-                onClick={prevWeek}
+                onClick={prevDate}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <svg
@@ -205,11 +200,11 @@ const CalendarDashboard: React.FC = () => {
 
               <h2 className="text-lg font-medium text-gray-900 min-w-[200px] text-center">
                 {format(weekDays[0], "MMM d")} -{" "}
-                {format(weekDays[6], "MMM d, yyyy")}
+                {format(weekDays[weekDays.length - 1], "MMM d, yyyy")}
               </h2>
 
               <button
-                onClick={nextWeek}
+                onClick={nextDate}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <svg
@@ -235,7 +230,7 @@ const CalendarDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           {/* Day Headers */}
-          <div className="grid grid-cols-1 sm:grid-cols-8 border-b border-gray-200">
+          <div className={`grid ${isMobile ? 'grid-cols-4' : 'grid-cols-8'} border-b border-gray-200`}>
             <div className="p-3 text-center text-sm font-medium text-gray-500 bg-gray-50">
               Time
             </div>
@@ -265,7 +260,7 @@ const CalendarDashboard: React.FC = () => {
           </div>
 
           {/* Calendar Body */}
-          <div className="grid grid-cols-8 min-h-[600px]">
+          <div className={`grid ${isMobile ? 'grid-cols-4' : 'grid-cols-8'} min-h-[600px]`}>
             {/* Time Column */}
             <div className="border-r border-gray-200">
               {Array.from({ length: 24 }, (_, hour) => (

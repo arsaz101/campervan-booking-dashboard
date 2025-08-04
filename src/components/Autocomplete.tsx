@@ -43,7 +43,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
   useEffect(() => {
     const searchStations = async () => {
-      if (query.trim().length < 2) {
+      if (query.trim().length < 2 || (selectedItem && query === selectedItem[displayKey])) {
         setSuggestions([]);
         setIsOpen(false);
         return;
@@ -66,7 +66,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
     const debounceTimer = setTimeout(searchStations, 300);
     return () => clearTimeout(debounceTimer);
-  }, [query, onSearch]);
+  }, [query, onSearch, selectedItem, displayKey]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

@@ -1,10 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import BookingDisplay from "../BookingDisplay";
-import * as api from "../../services/api";
-
-// Mock the api module
-jest.mock("../../services/api");
 
 const mockBooking = {
   id: "1",
@@ -45,10 +41,8 @@ describe("BookingDisplay", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("calls onReschedule when the reschedule button is clicked", async () => {
+  it("calls onReschedule when the reschedule button is clicked", () => {
     const onReschedule = jest.fn();
-    (api.rescheduleBooking as jest.Mock).mockResolvedValue(mockBooking);
-
     render(
       <BookingDisplay
         booking={mockBooking}
@@ -59,10 +53,6 @@ describe("BookingDisplay", () => {
     );
 
     fireEvent.click(screen.getByText("Reschedule"));
-
-    await waitFor(() => {
-      expect(api.rescheduleBooking).toHaveBeenCalled();
-      expect(onReschedule).toHaveBeenCalled();
-    });
+    expect(onReschedule).toHaveBeenCalled();
   });
 });

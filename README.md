@@ -33,6 +33,7 @@ A modern, responsive React application for managing campervan bookings with a ca
 - **Reschedule Booking**: Date picker interface for changing booking dates
 - **State Management**: Zustand store for global state management
 - **Unit Tests**: Comprehensive test coverage for all components and services
+- **Auto-scroll on Reschedule**: The calendar automatically scrolls to the new date when a booking is rescheduled.
 
 ## Technology Stack 🛠️
 
@@ -95,6 +96,9 @@ src/
 ├── services/
 │   ├── __tests__/           # Service tests
 │   └── api.ts              # Mock API functions
+├── state/
+│   ├── __tests__/           # State tests
+│   └── bookingsStore.ts    # Zustand store
 ├── types/
 │   └── index.ts            # TypeScript type definitions
 └── setupTests.ts           # Jest setup configuration
@@ -184,8 +188,6 @@ interface BookingsState {
     bookingId: string,
     updates: Partial<BookingWithDuration>
   ) => void;
-  addBooking: (booking: BookingWithDuration) => void;
-  removeBooking: (bookingId: string) => void;
 }
 ```
 
