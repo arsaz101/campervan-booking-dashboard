@@ -2,7 +2,7 @@
   "name": "campervan-booking-dashboard",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://<your-github-username>.github.io/campervan-booking-dashboard",
+  "homepage": "https://arsaz101.github.io/campervan-booking-dashboard",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
