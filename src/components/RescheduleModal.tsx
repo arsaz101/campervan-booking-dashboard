@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { format, addDays } from "date-fns";
+import { format, addDays, setHours, setMinutes } from "date-fns";
 import { Booking } from "../types";
 import { rescheduleBooking } from "../services/api";
 
@@ -20,20 +20,40 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
 }) => {
   const [newStartDate, setNewStartDate] = useState(booking.startDate);
   const [newEndDate, setNewEndDate] = useState(booking.endDate);
+  const [newStartTime, setNewStartTime] = useState(format(booking.startDate, "HH:mm"));
+  const [newEndTime, setNewEndTime] = useState(format(booking.endDate, "HH:mm"));
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const combineDateAndTime = (date: Date, time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return setMinutes(setHours(date, hours), minutes);
+  };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = new Date(e.target.value);
-    setNewStartDate(date);
+    setNewStartDate(combineDateAndTime(date, newStartTime));
 
     // Automatically adjust end date to maintain duration
     const duration = booking.duration;
     const adjustedEndDate = addDays(date, duration - 1);
-    setNewEndDate(adjustedEndDate);
+    setNewEndDate(combineDateAndTime(adjustedEndDate, newEndTime));
+  };
+
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = e.target.value;
+    setNewStartTime(time);
+    setNewStartDate(combineDateAndTime(newStartDate, time));
   };
 
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewEndDate(new Date(e.target.value));
+    const date = new Date(e.target.value);
+    setNewEndDate(combineDateAndTime(date, newEndTime));
+  };
+
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = e.target.value;
+    setNewEndTime(time);
+    setNewEndDate(combineDateAndTime(newEndDate, time));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,8 +126,8 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
               </label>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <div className="text-sm text-gray-600">
-                  <div>Start: {format(booking.startDate, "PPP")}</div>
-                  <div>End: {format(booking.endDate, "PPP")}</div>
+                  <div>Start: {format(booking.startDate, "PPP p")}</div>
+                  <div>End: {format(booking.endDate, "PPP p")}</div>
                   <div>Duration: {booking.duration} days</div>
                 </div>
               </div>
@@ -118,17 +138,27 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                 htmlFor="startDate"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                New Start Date
+                New Start Date and Time
               </label>
-              <input
-                type="date"
-                id="startDate"
-                value={formatDateForInput(newStartDate)}
-                onChange={handleStartDateChange}
-                min={formatDateForInput(new Date())}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+              <div className="flex space-x-2">
+                <input
+                  type="date"
+                  id="startDate"
+                  value={formatDateForInput(newStartDate)}
+                  onChange={handleStartDateChange}
+                  min={formatDateForInput(new Date())}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <input
+                  type="time"
+                  id="startTime"
+                  value={newStartTime}
+                  onChange={handleStartTimeChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
             </div>
 
             <div>
@@ -136,17 +166,27 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
                 htmlFor="endDate"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                New End Date
+                New End Date and Time
               </label>
-              <input
-                type="date"
-                id="endDate"
-                value={formatDateForInput(newEndDate)}
-                onChange={handleEndDateChange}
-                min={formatDateForInput(newStartDate)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+              <div className="flex space-x-2">
+                <input
+                  type="date"
+                  id="endDate"
+                  value={formatDateForInput(newEndDate)}
+                  onChange={handleEndDateChange}
+                  min={formatDateForInput(newStartDate)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <input
+                  type="time"
+                  id="endTime"
+                  value={newEndTime}
+                  onChange={handleEndTimeChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
             </div>
 
             <div className="bg-blue-50 p-3 rounded-lg">

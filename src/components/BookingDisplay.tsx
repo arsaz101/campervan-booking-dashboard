@@ -62,13 +62,13 @@ const BookingDisplay: React.FC<BookingDisplayProps> = ({
                   <div className="flex justify-between">
                     <span className="text-gray-600">Start Date:</span>
                     <span className="font-medium">
-                      {format(booking.startDate, "PPP")}
+                      {format(booking.startDate, "PPP p")}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">End Date:</span>
                     <span className="font-medium">
-                      {format(booking.endDate, "PPP")}
+                      {format(booking.endDate, "PPP p")}
                     </span>
                   </div>
                   <div className="flex justify-between">
