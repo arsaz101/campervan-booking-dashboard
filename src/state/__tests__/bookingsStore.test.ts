@@ -1,11 +1,26 @@
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import useBookingsStore from "../bookingsStore";
+import { Booking, Station } from "../../types";
+
+interface BookingWithDuration extends Booking {
+  duration: number;
+}
 
 describe("useBookingsStore", () => {
   it("should set and get bookings", () => {
     const { result } = renderHook(() => useBookingsStore());
-    const bookings = [{ id: "1", customerName: "Test" }];
+    const bookings: BookingWithDuration[] = [
+      {
+        id: "1",
+        customerName: "Test",
+        stationId: "1",
+        startDate: new Date(),
+        endDate: new Date(),
+        vehicleType: "Campervan",
+        duration: 1,
+      },
+    ];
     act(() => {
       result.current.setBookings(bookings);
     });
@@ -14,7 +29,12 @@ describe("useBookingsStore", () => {
 
   it("should set and get selected station", () => {
     const { result } = renderHook(() => useBookingsStore());
-    const station = { id: "1", name: "Test Station" };
+    const station: Station = {
+      id: "1",
+      name: "Test Station",
+      location: "Test Location",
+      availableVehicles: 10,
+    };
     act(() => {
       result.current.setSelectedStation(station);
     });
@@ -23,7 +43,15 @@ describe("useBookingsStore", () => {
 
   it("should set and get selected booking", () => {
     const { result } = renderHook(() => useBookingsStore());
-    const booking = { id: "1", customerName: "Test" };
+    const booking: BookingWithDuration = {
+      id: "1",
+      customerName: "Test",
+      stationId: "1",
+      startDate: new Date(),
+      endDate: new Date(),
+      vehicleType: "Campervan",
+      duration: 1,
+    };
     act(() => {
       result.current.setSelectedBooking(booking);
     });
@@ -49,7 +77,17 @@ describe("useBookingsStore", () => {
 
   it("should update a booking", () => {
     const { result } = renderHook(() => useBookingsStore());
-    const bookings = [{ id: "1", customerName: "Test" }];
+    const bookings: BookingWithDuration[] = [
+      {
+        id: "1",
+        customerName: "Test",
+        stationId: "1",
+        startDate: new Date(),
+        endDate: new Date(),
+        vehicleType: "Campervan",
+        duration: 1,
+      },
+    ];
     act(() => {
       result.current.setBookings(bookings);
     });
