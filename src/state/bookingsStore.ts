@@ -1,9 +1,5 @@
 import { create } from "zustand";
-import { Booking, Station } from "../types";
-
-interface BookingWithDuration extends Booking {
-  duration: number;
-}
+import { Booking, Station, BookingWithDuration } from "../types";
 
 interface BookingsState {
   bookings: BookingWithDuration[];

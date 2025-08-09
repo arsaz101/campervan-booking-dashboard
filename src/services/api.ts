@@ -1,4 +1,5 @@
 import { Station, Booking } from "../types";
+import { currentMonthDates, nextMonthDates } from "../utils/dates";
 
 // Mock data for stations
 const mockStations: Station[] = [
@@ -75,36 +76,6 @@ const mockStations: Station[] = [
     availableVehicles: 3,
   },
 ];
-
-// Generate dates for the current month and next month
-const getCurrentMonthDates = () => {
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-  const dates = [];
-  for (let day = 1; day <= daysInMonth; day++) {
-    dates.push(new Date(currentYear, currentMonth, day));
-  }
-  return dates;
-};
-
-const getNextMonthDates = () => {
-  const now = new Date();
-  const nextMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
-  const daysInMonth = new Date(currentYear, nextMonth + 1, 0).getDate();
-
-  const dates = [];
-  for (let day = 1; day <= daysInMonth; day++) {
-    dates.push(new Date(currentYear, nextMonth, day));
-  }
-  return dates;
-};
-
-const currentMonthDates = getCurrentMonthDates();
-const nextMonthDates = getNextMonthDates();
 
 // Mock data for booking details with more realistic scenarios
 const mockBookingDetails: { [key: string]: Booking & { duration: number } } = {

@@ -24,3 +24,7 @@ export interface RescheduleData {
     newStartDate: Date;
     newEndDate: Date;
 }
+
+export interface BookingWithDuration extends Booking {
+  duration: number;
+}
